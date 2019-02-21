@@ -1,6 +1,8 @@
 package com.leonardobishop.quests.obj.misc;
 
 import com.leonardobishop.quests.player.questprogressfile.QuestProgress;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -14,10 +16,20 @@ import java.util.regex.Pattern;
 
 public class QItemStack {
 
+    @Getter
+    @Setter
     private String name;
+    @Getter
+    @Setter
     private List<String> loreNormal;
+    @Getter
+    @Setter
     private List<String> loreStarted;
+    @Getter
+    @Setter
     private Material type;
+    @Getter
+    @Setter
     private int data;
 
     public QItemStack(String name, List<String> loreNormal, List<String> loreStarted, Material type, int data) {
@@ -25,46 +37,6 @@ public class QItemStack {
         this.loreNormal = loreNormal;
         this.loreStarted = loreStarted;
         this.type = type;
-        this.data = data;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<String> getLoreNormal() {
-        return loreNormal;
-    }
-
-    public void setLoreNormal(List<String> loreNormal) {
-        this.loreNormal = loreNormal;
-    }
-
-    public List<String> getLoreStarted() {
-        return loreStarted;
-    }
-
-    public void setLoreStarted(List<String> loreStarted) {
-        this.loreStarted = loreStarted;
-    }
-
-    public Material getType() {
-        return type;
-    }
-
-    public void setType(Material type) {
-        this.type = type;
-    }
-
-    public int getData() {
-        return data;
-    }
-
-    public void setData(int data) {
         this.data = data;
     }
 

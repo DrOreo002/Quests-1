@@ -24,7 +24,8 @@ import java.util.List;
 
 public final class InventoryTaskType extends TaskType {
 
-    private List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Quests plugin = Quests.getInstance();
 
     public InventoryTaskType() {
         super("inventory", "lmbishop", "Obtain a set of items.");
@@ -60,7 +61,7 @@ public final class InventoryTaskType extends TaskType {
     }
 
     private void checkInventory(Player player) {
-        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
         if (qPlayer == null) {
             return;
         }

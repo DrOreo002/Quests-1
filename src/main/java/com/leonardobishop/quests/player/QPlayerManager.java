@@ -11,7 +11,7 @@ import java.util.*;
 
 public class QPlayerManager {
 
-    private Map<UUID, QPlayer> qPlayers = new HashMap<>();
+    private final Map<UUID, QPlayer> qPlayers = new HashMap<>();
 
     public void addPlayer(QPlayer qPlayer) {
         qPlayers.put(qPlayer.getUuid(), qPlayer);

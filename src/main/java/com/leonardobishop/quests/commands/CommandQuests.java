@@ -18,11 +18,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.UUID;
+import static me.droreo002.oreocore.utils.strings.StringUtil.*;
 
 public class CommandQuests implements CommandExecutor {
 
+    private final Quests plugin;
+
+    public CommandQuests(Quests plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (Quests.getInstance().isBrokenConfig()) {
+        if (plugin.isBrokenConfig()) {
             sender.sendMessage(ChatColor.RED + "You have a YAML error in your config and Quests cannot load. If this is your first time using Quests, please " +
                     "delete the Quests folder and RESTART (not reload!) the server. If you have modified the config, check for errors in a YAML parser.");
             return true;
@@ -35,7 +43,7 @@ public class CommandQuests implements CommandExecutor {
 
         if (args.length == 0 && sender instanceof Player) {
             Player player = (Player) sender;
-            QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+            QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
             qPlayer.openQuests();
             return true;
         } else if (args.length >= 1) {
@@ -48,13 +56,13 @@ public class CommandQuests implements CommandExecutor {
                         showAdminHelp(sender, "moddata");
                         return true;
                     } else if (args[1].equalsIgnoreCase("reload")) {
-                        Quests.getInstance().reloadConfig();
-                        Quests.getInstance().reloadQuests();
+                        plugin.reloadConfig();
+                        plugin.reloadQuests();
                         sender.sendMessage(ChatColor.GRAY + "Quests was reloaded.");
                         return true;
                     } else if (args[1].equalsIgnoreCase("types")) {
                         sender.sendMessage(ChatColor.GRAY + "Registered task types:");
-                        for (TaskType taskType : Quests.getTaskTypeManager().getTaskTypes()) {
+                        for (TaskType taskType : plugin.getTaskTypeManager().getTaskTypes()) {
                             sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + taskType.getType());
                         }
                         sender.sendMessage(ChatColor.DARK_GRAY + "View info using /q a types [type].");
@@ -64,14 +72,14 @@ public class CommandQuests implements CommandExecutor {
                         new BukkitRunnable() {
                             @Override
                             public void run() {
-                                Quests.getUpdater().check();
-                                if (Quests.getUpdater().isUpdateReady()) {
-                                    sender.sendMessage(Quests.getUpdater().getMessage());
+                                plugin.getUpdater().check();
+                                if (plugin.getUpdater().isUpdateReady()) {
+                                    sender.sendMessage(plugin.getUpdater().getMessage());
                                 } else {
                                     sender.sendMessage(ChatColor.GRAY + "No updates were found.");
                                 }
                             }
-                        }.runTaskAsynchronously(Quests.getInstance());
+                        }.runTaskAsynchronously(plugin);
                         return true;
                     }
                 } else if (args.length == 3) {
@@ -83,7 +91,7 @@ public class CommandQuests implements CommandExecutor {
                         return true;
                     } else if (args[1].equalsIgnoreCase("types")) {
                         TaskType taskType = null;
-                        for (TaskType task : Quests.getTaskTypeManager().getTaskTypes()) {
+                        for (TaskType task : plugin.getTaskTypeManager().getTaskTypes()) {
                             if (task.getType().equals(args[2])) {
                                 taskType = task;
                             }
@@ -102,7 +110,7 @@ public class CommandQuests implements CommandExecutor {
                         if (args[2].equalsIgnoreCase("q") || args[2].equalsIgnoreCase("quests")) {
                             Player player = Bukkit.getPlayer(args[3]);
                             if (player != null) {
-                                QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+                                QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
                                 if (qPlayer != null) {
                                     qPlayer.openQuests();
                                     sender.sendMessage(Messages.COMMAND_QUEST_OPENQUESTS_ADMIN_SUCCESS.getMessage().replace("{player}", player.getName()));
@@ -130,22 +138,22 @@ public class CommandQuests implements CommandExecutor {
                             return true;
                         }
                         if (args[2].equalsIgnoreCase("fullreset")) {
-                            if (Quests.getPlayerManager().getPlayer(uuid) == null) {
+                            if (plugin.getPlayerManager().getPlayer(uuid) == null) {
                                 sender.sendMessage(Messages.COMMAND_QUEST_ADMIN_LOADDATA.getMessage().replace("{player}", name));
-                                Quests.getPlayerManager().loadPlayer(uuid, true);
+                                plugin.getPlayerManager().loadPlayer(uuid, true);
                             }
-                            if (Quests.getPlayerManager().getPlayer(uuid) == null) {
+                            if (plugin.getPlayerManager().getPlayer(uuid) == null) {
                                 sender.sendMessage(Messages.COMMAND_QUEST_ADMIN_NODATA.getMessage().replace("{player}", name));
                                 return true;
                             }
-                            QuestProgressFile questProgressFile = Quests.getPlayerManager().getPlayer(uuid).getQuestProgressFile();
+                            QuestProgressFile questProgressFile = plugin.getPlayerManager().getPlayer(uuid).getQuestProgressFile();
                             questProgressFile.clear();
                             questProgressFile.saveToDisk();
                             sender.sendMessage(Messages.COMMAND_QUEST_ADMIN_FULLRESET.getMessage().replace("{player}", name));
                             return true;
                         }
-                        if (Quests.getPlayerManager().getPlayer(uuid).isOnlyDataLoaded()) {
-                            Quests.getPlayerManager().removePlayer(uuid);
+                        if (plugin.getPlayerManager().getPlayer(uuid).isOnlyDataLoaded()) {
+                            plugin.getPlayerManager().removePlayer(uuid);
                         }
                         showAdminHelp(sender, "moddata");
                         return true;
@@ -157,14 +165,14 @@ public class CommandQuests implements CommandExecutor {
                                 sender.sendMessage(Messages.COMMAND_CATEGORY_OPEN_DISABLED.getMessage());
                                 return true;
                             }
-                            Category category = Quests.getQuestManager().getCategoryById(args[4]);
+                            Category category = plugin.getQuestManager().getCategoryById(args[4]);
                             if (category == null) {
                                 sender.sendMessage(Messages.COMMAND_CATEGORY_OPEN_DOESNTEXIST.getMessage().replace("{category}", args[4]));
                                 return true;
                             }
                             Player player = Bukkit.getPlayer(args[3]);
                             if (player != null) {
-                                QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+                                QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
                                 if (qPlayer != null) {
                                     if (qPlayer.openCategory(category, null) == 0) {
                                         sender.sendMessage(Messages.COMMAND_QUEST_OPENCATEGORY_ADMIN_SUCCESS.getMessage().replace("{player}", player.getName())
@@ -195,19 +203,18 @@ public class CommandQuests implements CommandExecutor {
                             sender.sendMessage(Messages.COMMAND_QUEST_ADMIN_PLAYERNOTFOUND.getMessage().replace("{player}", args[3]));
                             return true;
                         }
-                        if (Quests.getPlayerManager().getPlayer(uuid) == null) {
+                        if (plugin.getPlayerManager().getPlayer(uuid) == null) {
                             sender.sendMessage(Messages.COMMAND_QUEST_ADMIN_LOADDATA.getMessage().replace("{player}", name));
-                            Quests.getPlayerManager().loadPlayer(uuid, true);
+                            plugin.getPlayerManager().loadPlayer(uuid, true);
                         }
-                        if (Quests.getPlayerManager().getPlayer(uuid) == null) {
+                        if (plugin.getPlayerManager().getPlayer(uuid) == null) {
                             sender.sendMessage(Messages.COMMAND_QUEST_ADMIN_NODATA.getMessage().replace("{player}", name));
                             success = true;
                         }
-                        QuestProgressFile questProgressFile = Quests.getPlayerManager().getPlayer(uuid).getQuestProgressFile();
-                        Quest quest = Quests.getQuestManager().getQuestById(args[4]);
+                        QuestProgressFile questProgressFile = plugin.getPlayerManager().getPlayer(uuid).getQuestProgressFile();
+                        Quest quest = plugin.getQuestManager().getQuestById(args[4]);
                         if (quest == null) {
                             sender.sendMessage(Messages.COMMAND_QUEST_START_DOESNTEXIST.getMessage().replace("{quest}", args[4]));
-                            success = true;
                             return true;
                         }
                         if (args[2].equalsIgnoreCase("reset")) {
@@ -248,8 +255,8 @@ public class CommandQuests implements CommandExecutor {
                             sender.sendMessage(Messages.COMMAND_QUEST_ADMIN_COMPLETE_SUCCESS.getMessage().replace("{player}", name).replace("{quest}", quest.getId()));
                             success = true;
                         }
-                        if (Quests.getPlayerManager().getPlayer(uuid).isOnlyDataLoaded()) {
-                            Quests.getPlayerManager().removePlayer(uuid);
+                        if (plugin.getPlayerManager().getPlayer(uuid).isOnlyDataLoaded()) {
+                            plugin.getPlayerManager().removePlayer(uuid);
                         }
                         if (!success) {
                             showAdminHelp(sender, "moddata");
@@ -263,11 +270,11 @@ public class CommandQuests implements CommandExecutor {
             if (sender instanceof Player && (args[0].equalsIgnoreCase("q") || args[0].equalsIgnoreCase("quests"))) {
                 Player player = (Player) sender;
                 if (args.length >= 2) {
-                    Quest quest = Quests.getQuestManager().getQuestById(args[1]);
+                    Quest quest = plugin.getQuestManager().getQuestById(args[1]);
                     if (quest == null) {
                         sender.sendMessage(Messages.COMMAND_QUEST_START_DOESNTEXIST.getMessage().replace("{quest}", args[1]));
                     } else {
-                        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+                        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
                         if (qPlayer == null) {
                             // shit + fan
                             sender.sendMessage(ChatColor.RED + "An error occurred finding your player.");
@@ -284,11 +291,11 @@ public class CommandQuests implements CommandExecutor {
                 }
                 Player player = (Player) sender;
                 if (args.length >= 2) {
-                    Category category = Quests.getQuestManager().getCategoryById(args[1]);
+                    Category category = plugin.getQuestManager().getCategoryById(args[1]);
                     if (category == null) {
                         sender.sendMessage(Messages.COMMAND_CATEGORY_OPEN_DOESNTEXIST.getMessage().replace("{category}", args[1]));
                     } else {
-                        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+                        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
                         qPlayer.openCategory(category, null);
                         return true;
                     }
@@ -304,52 +311,37 @@ public class CommandQuests implements CommandExecutor {
     }
 
     private void showHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------=[" + ChatColor.RED + " Quests v" + Quests.getInstance()
-                .getDescription().getVersion() + " " + ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "]=------------");
-        sender.sendMessage(ChatColor.GRAY + "The following commands are available: ");
-        sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests " + ChatColor.DARK_GRAY + ": show quests");
-        sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests c/category <categoryid> " + ChatColor.DARK_GRAY + ": open category by ID");
-        sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests q/quest <questid> " + ChatColor.DARK_GRAY + ": start quest by ID");
-        sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests a/admin " + ChatColor.DARK_GRAY + ": view help for admins");
-        sender.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "--------=[" + ChatColor.RED + " made with <3 by lmbishop " + ChatColor
-                .GRAY.toString() + ChatColor.STRIKETHROUGH + "]=--------");
+        sender.sendMessage(color("&8&m------------------ &7[ &bQuest &7] &8&m------------------"));
+        sender.sendMessage(" ");
+        sender.sendMessage(color("&b            Code edited by &eDrOreo002"));
+        sender.sendMessage(" ");
+        sender.sendMessage("&7(&b✿&7) &8» &e/quest &f: Main command");
+        sender.sendMessage("&7(&b✿&7) &8» &e/quest <c|category> <id> &f: Open category by ID");
+        sender.sendMessage("&7(&b✿&7) &8» &e/quest <q|quest> <id> &f: Start quest by ID");
+        sender.sendMessage("&7(&b✿&7) &8» &e/quest <a|admin> &f: Open admin help command");
+        sender.sendMessage(" ");
+        sender.sendMessage(color("&8&m------------------ &7[ &bQuest &7] &8&m------------------"));
     }
 
     private void showAdminHelp(CommandSender sender, String command) {
+        sender.sendMessage(color("&8&m------------------ &7[ &bQuest &7] &8&m------------------"));
+        sender.sendMessage(" ");
         if (command != null && command.equalsIgnoreCase("opengui")) {
-            sender.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------=[" + ChatColor.RED + " Quests Admin: opengui " + ChatColor
-                    .GRAY.toString() + ChatColor.STRIKETHROUGH + "]=------------");
-            sender.sendMessage(ChatColor.GRAY + "The following commands are available: ");
-            sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests a opengui q/quest <player> " + ChatColor.DARK_GRAY + ": forcefully show" +
-                    " quests for player");
-            sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests a opengui c/category <player> <category> " + ChatColor.DARK_GRAY + ": " +
-                    "forcefully " +
-                    "open category by ID for player");
-            sender.sendMessage(ChatColor.GRAY + "These commands are useful for command NPCs. These will bypass the usual quests.command permission.");
+            sender.sendMessage("&7(&b✿&7) &8» &e/quest a opengui <q|quest> <player> &f: Show quest for player");
+            sender.sendMessage("&7(&b✿&7) &8» &e/quest a opengui <c|category> <player> <category> &f: Show quest category to player");
         } else if (command != null && command.equalsIgnoreCase("moddata")) {
-            sender.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------=[" + ChatColor.RED + " Quests Admin: moddata " + ChatColor
-                    .GRAY.toString() + ChatColor.STRIKETHROUGH + "]=------------");
-            sender.sendMessage(ChatColor.GRAY + "The following commands are available: ");
-            sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests a moddata fullreset <player> " + ChatColor.DARK_GRAY + ": clear a " +
-                    "players quest data file");
-            sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests a moddata reset <player> <questid>" + ChatColor.DARK_GRAY + ": clear a " +
-                    "players data for specifc quest");
-            sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests a moddata start <player> <questid>" + ChatColor.DARK_GRAY + ": start a " +
-                    "quest for a player");
-            sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests a moddata complete <player> <questid>" + ChatColor.DARK_GRAY + ": " +
-                    "complete a quest for a player");
-            sender.sendMessage(ChatColor.GRAY + "These commands modify quest progress for players. Use them cautiously. Changes are irreversible.");
+            sender.sendMessage("&7(&b✿&7) &8» &e/quest a moddata fullreset <player> &f: Clear player's data file");
+            sender.sendMessage("&7(&b✿&7) &8» &e/quest a moddata reset <player> <questID> &f: Clear player data for x quest");
+            sender.sendMessage("&7(&b✿&7) &8» &e/quest a mmoddata start <player> <questID> &f: Start a quest for that player");
+            sender.sendMessage("&7(&b✿&7) &8» &e/quest a moddata complete <player> <questID> &f: Complete the player's quest");
         } else {
-            sender.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "------------=[" + ChatColor.RED + " Quests Admin " + ChatColor.GRAY
-                    .toString() + ChatColor.STRIKETHROUGH + "]=------------");
-            sender.sendMessage(ChatColor.GRAY + "The following commands are available: ");
-            sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests a opengui " + ChatColor.DARK_GRAY + ": view help for opengui");
-            sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests a moddata " + ChatColor.DARK_GRAY + ": view help for quest progression");
-            sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests a types [type]" + ChatColor.DARK_GRAY + ": view registered task types");
-            sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests a reload " + ChatColor.DARK_GRAY + ": reload Quests configuration");
-            sender.sendMessage(ChatColor.DARK_GRAY + " * " + ChatColor.RED + "/quests a update " + ChatColor.DARK_GRAY + ": check for updates");
+            sender.sendMessage("&7(&b✿&7) &8» &e/quest a opengui &f: View help for opengui command");
+            sender.sendMessage("&7(&b✿&7) &8» &e/quest a moddata &f: View help for moddata command");
+            sender.sendMessage("&7(&b✿&7) &8» &e/quest a types <type> &f: View registered task types");
+            sender.sendMessage("&7(&b✿&7) &8» &e/quest a reload &f: Reload the config and other things");
+            sender.sendMessage("&7(&b✿&7) &8» &e/quest a update &f: Check for an update");;
         }
-        sender.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "-----=[" + ChatColor.RED + " requires permission: quests.admin " +
-                ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "]=-----");
+        sender.sendMessage(" ");
+        sender.sendMessage(color("&8&m------------------ &7[ &bQuest &7] &8&m------------------"));
     }
 }

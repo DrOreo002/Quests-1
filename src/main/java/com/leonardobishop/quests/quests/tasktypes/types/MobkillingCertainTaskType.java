@@ -22,7 +22,8 @@ import java.util.List;
 
 public final class MobkillingCertainTaskType extends TaskType {
 
-    private List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Quests plugin = Quests.getInstance();
 
     public MobkillingCertainTaskType() {
         super("mobkillingcertain", "lmbishop", "Kill a set amount of a specific entity type.");
@@ -51,7 +52,7 @@ public final class MobkillingCertainTaskType extends TaskType {
 
         Player player = event.getEntity().getKiller();
 
-        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
         QuestProgressFile questProgressFile = qPlayer.getQuestProgressFile();
 
         for (Quest quest : super.getRegisteredQuests()) {

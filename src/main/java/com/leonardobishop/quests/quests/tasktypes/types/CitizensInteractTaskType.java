@@ -24,7 +24,8 @@ import java.util.List;
 
 public final class CitizensInteractTaskType extends TaskType {
 
-    private List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Quests plugin = Quests.getInstance();
 
     public CitizensInteractTaskType() {
         super("citizens_interact", "lmbishop", "Interact with an NPC to complete the quest.");
@@ -38,7 +39,7 @@ public final class CitizensInteractTaskType extends TaskType {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onNPCClick(NPCRightClickEvent event) {
-        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(event.getClicker().getUniqueId());
+        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(event.getClicker().getUniqueId());
         if (qPlayer == null) {
             return;
         }

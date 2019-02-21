@@ -6,6 +6,9 @@ import com.leonardobishop.quests.quests.Quest;
 import com.leonardobishop.quests.Quests;
 import com.leonardobishop.quests.obj.Items;
 import com.leonardobishop.quests.obj.Options;
+import lombok.Getter;
+import lombok.Setter;
+import me.droreo002.oreocore.utils.strings.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -19,16 +22,27 @@ import java.util.concurrent.TimeUnit;
 
 public class QMenuQuest implements QMenu {
 
-    private HashMap<Integer, String> slotsToQuestIds = new HashMap<>();
+    private final Quests plugin = Quests.getInstance();
+    private final Map<Integer, String> slotsToQuestIds = new HashMap<>();
+    private final QPlayer owner;
+
+    @Getter
     private int backButtonLocation = -1;
+    @Getter
     private int pagePrevLocation = -1;
+    @Getter
     private int pageNextLocation = -1;
+    @Getter
     private int currentPage = -1;
+    @Getter
+    @Setter
     private boolean backButtonEnabled = true;
+    @Getter
     private QMenuCategory superMenu;
+    @Getter
     private String categoryName;
+    @Getter
     private final int pageSize = 45;
-    private QPlayer owner;
 
     public QMenuQuest(QPlayer owner, String categoryName, QMenuCategory superMenu) {
         this.owner = owner;
@@ -57,7 +71,7 @@ public class QMenuQuest implements QMenu {
     }
 
     @Override
-    public HashMap<Integer, String> getSlotsToMenu() {
+    public Map<Integer, String> getSlotsToMenu() {
         return slotsToQuestIds;
     }
 
@@ -66,31 +80,11 @@ public class QMenuQuest implements QMenu {
         return owner;
     }
 
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public int getPagePrevLocation() {
-        return pagePrevLocation;
-    }
-
-    public int getPageNextLocation() {
-        return pageNextLocation;
-    }
-
-    public int getCurrentPage() {
-        return currentPage;
-    }
-
-    public int getPageSize() {
-        return pageSize;
-    }
-
     public Inventory toInventory(int page) {
         currentPage = page;
         int pageMin = pageSize * (page - 1);
         int pageMax = pageSize * page;
-        String title = Options.color(Options.GUITITLE_QUESTS.getStringValue());
+        String title = StringUtil.color(Options.GUITITLE_QUESTS.getStringValue());
 
         ItemStack pageIs;
         ItemStack pagePrevIs;
@@ -102,13 +96,13 @@ public class QMenuQuest implements QMenu {
         int invSlot = 0;
         for (int pointer = pageMin; pointer < pageMax; pointer++) {
             if (slotsToQuestIds.containsKey(pointer)) {
-                Quest quest = Quests.getQuestManager().getQuestById(slotsToQuestIds.get(pointer));
+                Quest quest = plugin.getQuestManager().getQuestById(slotsToQuestIds.get(pointer));
                 QuestProgress questProgress = owner.getQuestProgressFile().getQuestProgress(quest);
                 long cooldown = owner.getQuestProgressFile().getCooldownFor(quest);
                 if (!owner.getQuestProgressFile().hasMetRequirements(quest)) {
                     List<String> quests = new ArrayList<>();
                     for (String requirement : quest.getRequirements()) {
-                        quests.add(Quests.getQuestManager().getQuestById(requirement).getDisplayNameStripped());
+                        quests.add(plugin.getQuestManager().getQuestById(requirement).getDisplayNameStripped());
                     }
                     Map<String, String> placeholders = new HashMap<>();
                     placeholders.put("{quest}", quest.getDisplayNameStripped());
@@ -132,7 +126,7 @@ public class QMenuQuest implements QMenu {
                     ItemStack is = replaceItemStack(Items.QUEST_COOLDOWN.getItem(), placeholders);
                     inventory.setItem(invSlot, is);
                 } else {
-                    inventory.setItem(invSlot, Quests.getQuestManager().getQuestById(quest.getId()).getDisplayItem().toItemStack(questProgress));
+                    inventory.setItem(invSlot, plugin.getQuestManager().getQuestById(quest.getId()).getDisplayItem().toItemStack(questProgress));
                 }
             }
             invSlot++;
@@ -195,22 +189,6 @@ public class QMenuQuest implements QMenu {
         }
 
         return inventory;
-    }
-
-    public boolean isBackButtonEnabled() {
-        return backButtonEnabled;
-    }
-
-    public void setBackButtonEnabled(boolean backButtonEnabled) {
-        this.backButtonEnabled = backButtonEnabled;
-    }
-
-    public int getBackButtonLocation() {
-        return backButtonLocation;
-    }
-
-    public QMenuCategory getSuperMenu() {
-        return superMenu;
     }
 
     public ItemStack replaceItemStack(ItemStack is, Map<String, String> placeholders) {

@@ -19,6 +19,7 @@ import java.util.List;
 public final class BuildingTaskType extends TaskType {
 
     private List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Quests plugin = Quests.getInstance();
 
     public BuildingTaskType() {
         super("blockplace", "lmbishop", "Place a set amount of blocks.");
@@ -32,7 +33,7 @@ public final class BuildingTaskType extends TaskType {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
-        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
         QuestProgressFile questProgressFile = qPlayer.getQuestProgressFile();
 
         for (Quest quest : super.getRegisteredQuests()) {

@@ -1,10 +1,16 @@
 package com.leonardobishop.quests.blocktype;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
 
 public class Block {
 
+    @Getter
+    @Setter
     private Material material;
+    @Getter
+    @Setter
     private short data;
 
     public Block(Material material, short data) {
@@ -14,21 +20,5 @@ public class Block {
 
     public Block(Material material) {
         this.material = material;
-    }
-
-    public Material getMaterial() {
-        return material;
-    }
-
-    public short getData() {
-        return data;
-    }
-
-    public void setMaterial(Material material) {
-        this.material = material;
-    }
-
-    public void setData(short data) {
-        this.data = data;
     }
 }

@@ -22,7 +22,8 @@ import java.util.List;
 
 public final class MiningCertainTaskType extends TaskType {
 
-    private List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Quests plugin = Quests.getInstance();
 
     public MiningCertainTaskType() {
         super("blockbreakcertain", "lmbishop", "Break a set amount of a specific block.");
@@ -39,7 +40,7 @@ public final class MiningCertainTaskType extends TaskType {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
-        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
         QuestProgressFile questProgressFile = qPlayer.getQuestProgressFile();
 
         for (Quest quest : super.getRegisteredQuests()) {

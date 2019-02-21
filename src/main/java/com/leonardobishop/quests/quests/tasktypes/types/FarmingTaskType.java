@@ -21,7 +21,8 @@ import java.util.List;
 
 public final class FarmingTaskType extends TaskType {
 
-    private List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Quests plugin = Quests.getInstance();
 
     public FarmingTaskType() {
         super("farming", "lmbishop", "Break a set amount of a crop.");
@@ -42,7 +43,7 @@ public final class FarmingTaskType extends TaskType {
         }
         Crops crop = (Crops) event.getBlock().getState();
 
-        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
         QuestProgressFile questProgressFile = qPlayer.getQuestProgressFile();
 
         for (Quest quest : super.getRegisteredQuests()) {

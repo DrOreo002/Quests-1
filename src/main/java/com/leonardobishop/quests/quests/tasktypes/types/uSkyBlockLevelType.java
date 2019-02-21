@@ -18,7 +18,8 @@ import java.util.List;
 
 public final class uSkyBlockLevelType extends TaskType {
 
-    private List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Quests plugin = Quests.getInstance();
 
     public uSkyBlockLevelType() {
         super("uskyblock_level", "lmbishop", "Reach a certain island level for uSkyBlock.");
@@ -32,7 +33,7 @@ public final class uSkyBlockLevelType extends TaskType {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onIslandLevel(uSkyBlockScoreChangedEvent event) {
-        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
         if (qPlayer == null) {
             return;
         }

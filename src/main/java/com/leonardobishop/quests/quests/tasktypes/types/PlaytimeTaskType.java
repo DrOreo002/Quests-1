@@ -7,12 +7,18 @@ import com.leonardobishop.quests.player.questprogressfile.QuestProgressFile;
 import com.leonardobishop.quests.player.questprogressfile.TaskProgress;
 import com.leonardobishop.quests.quests.Quest;
 import com.leonardobishop.quests.quests.Task;
+import com.leonardobishop.quests.quests.tasktypes.ConfigValue;
 import com.leonardobishop.quests.quests.tasktypes.TaskType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class PlaytimeTaskType extends TaskType {
+
+    private final Quests plugin = Quests.getInstance();
 
     public PlaytimeTaskType() {
         super("playtime", "Reinatix", "Track the amount of playing time a user has been on");
@@ -24,7 +30,7 @@ public final class PlaytimeTaskType extends TaskType {
             @Override
             public void run() {
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+                    QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
                     QuestProgressFile questProgressFile = qPlayer.getQuestProgressFile();
                     for (Quest quest : PlaytimeTaskType.super.getRegisteredQuests()) {
                         if (questProgressFile.hasStartedQuest(quest)) {
@@ -51,4 +57,8 @@ public final class PlaytimeTaskType extends TaskType {
         }.runTaskTimer(Quests.getInstance(), 1200L, 1200L);
     }
 
+    @Override
+    public List<ConfigValue> getCreatorConfigValues() {
+        return new ArrayList<>();
+    }
 }

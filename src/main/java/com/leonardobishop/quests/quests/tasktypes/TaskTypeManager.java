@@ -3,18 +3,17 @@ package com.leonardobishop.quests.quests.tasktypes;
 import com.leonardobishop.quests.Quests;
 import com.leonardobishop.quests.quests.Quest;
 import com.leonardobishop.quests.quests.Task;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 public class TaskTypeManager {
 
-    private ArrayList<TaskType> taskTypes = new ArrayList<>();
-
-    public ArrayList<TaskType> getTaskTypes() {
-        return taskTypes;
-    }
+    @Getter
+    private final List<TaskType> taskTypes = new ArrayList<>();
 
     public void resetTaskTypes() {
         for (TaskType taskType : taskTypes) {

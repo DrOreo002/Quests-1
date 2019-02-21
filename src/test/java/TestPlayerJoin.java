@@ -26,7 +26,7 @@ public class TestPlayerJoin extends TestCase {
         FakePlayer player = new FakePlayer("bob", new UUID(0L, 0L));
         PlayerJoinEvent joinEvent = new FakePlayerJoinEvent(player, "bob joined");
 
-        EventPlayerJoin eventToTest = new EventPlayerJoin();
+        EventPlayerJoin eventToTest = new EventPlayerJoin(Quests.getInstance());
         eventToTest.onEvent(joinEvent);
 
         assertNotNull(quests.getPlayerManager().getPlayer(player.getUniqueId()));

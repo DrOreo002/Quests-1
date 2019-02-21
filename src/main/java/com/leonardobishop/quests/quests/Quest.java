@@ -1,23 +1,35 @@
 package com.leonardobishop.quests.quests;
 
 import com.leonardobishop.quests.obj.misc.QItemStack;
+import lombok.Getter;
 import org.bukkit.ChatColor;
 
 import java.util.*;
 
 public class Quest {
 
-    private Map<String, Task> tasks = new HashMap<>();
+    private final Map<String, Task> tasks = new HashMap<>();
     //TODO: maybe store by <tasktypename (string), list<task>> since we never get task by id, but always get tasks by type.
+
+    @Getter
     private String id;
+    @Getter
     private QItemStack displayItem;
+    @Getter
     private List<String> rewards;
+    @Getter
     private List<String> requirements;
+    @Getter
     private List<String> rewardString;
+    @Getter
     private boolean repeatable;
+    @Getter
     private boolean cooldownEnabled;
+    @Getter
     private int cooldown;
+    @Getter
     private boolean permissionRequired;
+    @Getter
     private String categoryid;
 
 
@@ -54,51 +66,6 @@ public class Quest {
             }
         }
         return tasks;
-    }
-
-
-    public boolean isPermissionRequired() {
-        return permissionRequired;
-    }
-
-    public void setPermissionRequired(boolean permissionRequired) {
-        this.permissionRequired = permissionRequired;
-    }
-
-    public List<String> getRewardString() {
-        return rewardString;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public QItemStack getDisplayItem() {
-        return displayItem;
-    }
-
-    public List<String> getRewards() {
-        return rewards;
-    }
-
-    public List<String> getRequirements() {
-        return requirements;
-    }
-
-    public boolean isRepeatable() {
-        return repeatable;
-    }
-
-    public boolean isCooldownEnabled() {
-        return cooldownEnabled;
-    }
-
-    public int getCooldown() {
-        return cooldown;
-    }
-
-    public String getCategoryId() {
-        return categoryid;
     }
 
     public String getDisplayNameStripped() {

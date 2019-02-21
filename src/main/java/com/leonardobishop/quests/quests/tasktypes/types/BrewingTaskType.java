@@ -20,15 +20,13 @@ import org.bukkit.event.inventory.BrewEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public final class BrewingTaskType extends TaskType {
 
-    private List<ConfigValue> creatorConfigValues = new ArrayList<>();
-    private HashMap<Location, UUID> brewingStands = new HashMap<>();
+    private final List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Map<Location, UUID> brewingStands = new HashMap<>();
+    private final Quests plugin = Quests.getInstance();
 
     public BrewingTaskType() {
         super("brewing", "lmbishop", "Brew a potion.");
@@ -59,7 +57,7 @@ public final class BrewingTaskType extends TaskType {
                 return;
             }
 
-            QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+            QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
             QuestProgressFile questProgressFile = qPlayer.getQuestProgressFile();
 
             for (Quest quest : super.getRegisteredQuests()) {

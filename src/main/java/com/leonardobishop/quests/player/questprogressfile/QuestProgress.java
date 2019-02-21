@@ -1,5 +1,8 @@
 package com.leonardobishop.quests.player.questprogressfile;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,13 +10,25 @@ import java.util.UUID;
 
 public class QuestProgress {
 
-    private Map<String, TaskProgress> taskProgress = new HashMap<>();
+    private final Map<String, TaskProgress> taskProgress = new HashMap<>();
+    @Getter
     private String questid;
+    @Getter
+    @Setter
     private boolean started;
+    @Getter
+    @Setter
     private boolean completed;
+    @Getter
+    @Setter
     private boolean completedBefore;
+    @Getter
+    @Setter
     private long completionDate;
+    @Getter
     private UUID player;
+    @Getter
+    @Setter
     private boolean modified;
 
     public QuestProgress(String questid, boolean completed, boolean completedBefore, long completionDate, UUID player, boolean started) {
@@ -30,52 +45,8 @@ public class QuestProgress {
         this.modified = modified;
     }
 
-    public String getQuestId() {
-        return questid;
-    }
-
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
-        this.modified = true;
-    }
-
-    public boolean isStarted() {
-        return started;
-    }
-
-    public void setStarted(boolean started) {
-        this.started = started;
-        this.modified = true;
-    }
-
-    public long getCompletionDate() {
-        return completionDate;
-    }
-
-    public void setCompletionDate(long completionDate) {
-        this.completionDate = completionDate;
-        this.modified = true;
-    }
-
-    public UUID getPlayer() {
-        return player;
-    }
-
-    public boolean isCompletedBefore() {
-        return completedBefore;
-    }
-
-    public void setCompletedBefore(boolean completedBefore) {
-        this.completedBefore = completedBefore;
-        this.modified = true;
-    }
-
     public void addTaskProgress(TaskProgress taskProgress) {
-        this.taskProgress.put(taskProgress.getTaskId(), taskProgress);
+        this.taskProgress.put(taskProgress.getTaskid(), taskProgress);
     }
 
     public Collection<TaskProgress> getTaskProgress() {
@@ -94,13 +65,5 @@ public class QuestProgress {
     public void repairTaskProgress(String taskid) {
         TaskProgress taskProgress = new TaskProgress(taskid, null, player, false);
         this.addTaskProgress(taskProgress);
-    }
-
-    public boolean isWorthSaving() {
-        return modified;
-    }
-
-    public void setWorthSaving(boolean modified) {
-        this.modified = modified;
     }
 }

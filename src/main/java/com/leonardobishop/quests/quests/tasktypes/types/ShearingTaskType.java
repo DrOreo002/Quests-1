@@ -20,7 +20,8 @@ import java.util.List;
 
 public final class ShearingTaskType extends TaskType {
 
-    private List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Quests plugin = Quests.getInstance();
 
     public ShearingTaskType() {
         super("shearing", "lmbishop", "Shear a set amount of sheep.");
@@ -40,7 +41,7 @@ public final class ShearingTaskType extends TaskType {
 
         Player player = event.getPlayer();
 
-        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
         QuestProgressFile questProgressFile = qPlayer.getQuestProgressFile();
 
         for (Quest quest : super.getRegisteredQuests()) {

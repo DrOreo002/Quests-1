@@ -4,6 +4,7 @@ import com.leonardobishop.quests.player.QPlayer;
 import com.leonardobishop.quests.quests.Category;
 import com.leonardobishop.quests.Quests;
 import com.leonardobishop.quests.obj.Options;
+import me.droreo002.oreocore.utils.strings.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
@@ -11,12 +12,14 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class QMenuCategory implements QMenu {
 
     private final int pageSize = 45;
-    private HashMap<Integer, QMenuQuest> slotsToMenuQuest = new HashMap<>();
-    private QPlayer owner;
+    private final Quests plugin = Quests.getInstance();
+    private final Map<Integer, QMenuQuest> slotsToMenuQuest = new HashMap<>();
+    private final QPlayer owner;
 
     public QMenuCategory(QPlayer owner) {
         this.owner = owner;
@@ -25,7 +28,7 @@ public class QMenuCategory implements QMenu {
     public void populate(List<QMenuQuest> menuQuests) {
         int slot = 0;
         for (QMenuQuest qMenuQuest : menuQuests) {
-            if (Options.GUI_HIDE_CATEGORIES_NOPERMISSION.getBooleanValue() && Quests.getQuestManager().getCategoryById(qMenuQuest.getCategoryName()).isPermissionRequired()) {
+            if (Options.GUI_HIDE_CATEGORIES_NOPERMISSION.getBooleanValue() && plugin.getQuestManager().getCategoryById(qMenuQuest.getCategoryName()).isPermissionRequired()) {
                 if (!Bukkit.getPlayer(owner.getUuid()).hasPermission("quests.category." + qMenuQuest.getCategoryName())) {
                     continue;
                 }
@@ -36,7 +39,7 @@ public class QMenuCategory implements QMenu {
     }
 
     @Override
-    public HashMap<Integer, QMenuQuest> getSlotsToMenu() {
+    public Map<Integer, QMenuQuest> getSlotsToMenu() {
         return slotsToMenuQuest;
     }
 
@@ -48,7 +51,7 @@ public class QMenuCategory implements QMenu {
     public Inventory toInventory(int page) {
         int pageMin = pageSize * (page - 1);
         int pageMax = pageSize * page;
-        String title = Options.color(Options.GUITITLE_QUESTS_CATEGORY.getStringValue());
+        String title = StringUtil.color(Options.GUITITLE_QUESTS_CATEGORY.getStringValue());
 
         ItemStack pageIs = new ItemStack(Material.DIRT);
 
@@ -56,7 +59,7 @@ public class QMenuCategory implements QMenu {
 
         for (int pointer = pageMin; pointer < pageMax; pointer++) {
             if (slotsToMenuQuest.containsKey(pointer)) {
-                Category category = Quests.getQuestManager().getCategoryById(slotsToMenuQuest.get(pointer).getCategoryName());
+                Category category = plugin.getQuestManager().getCategoryById(slotsToMenuQuest.get(pointer).getCategoryName());
                 if (category != null) {
                     inventory.setItem(pointer, category.getDisplayItem());
                 }

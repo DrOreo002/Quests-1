@@ -1,6 +1,7 @@
 package com.leonardobishop.quests.quests.tasktypes;
 
 import com.leonardobishop.quests.quests.Quest;
+import lombok.Getter;
 import org.bukkit.event.Listener;
 
 import java.util.ArrayList;
@@ -9,10 +10,14 @@ import java.util.List;
 
 public abstract class TaskType implements Listener {
 
-    private List<Quest> quests = new ArrayList<>();
-    private String type;
-    private String author;
-    private String description;
+    protected final List<Quest> quests = new ArrayList<>();
+
+    @Getter
+    protected String type;
+    @Getter
+    protected String author;
+    @Getter
+    protected String description;
 
     public TaskType(String type, String author, String description) {
         this.type = type;
@@ -30,27 +35,9 @@ public abstract class TaskType implements Listener {
         }
     }
 
-    public final void unregisterAll() {
-        quests.clear();
-    }
-
     public final List<Quest> getRegisteredQuests() {
         return quests;
     }
 
-    public final String getType() {
-        return type;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public List<ConfigValue> getCreatorConfigValues() {
-        return Collections.emptyList();
-    }
+    public abstract List<ConfigValue> getCreatorConfigValues();
 }

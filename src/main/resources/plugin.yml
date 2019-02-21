@@ -5,6 +5,7 @@ version: %PLUGIN_VERSION%
 
 main: com.leonardobishop.quests.Quests
 author: lmbishop
+depend: [OreoCore]
 softdepend: [ASkyBlock, uSkyBlock, Citizens]
 prefix: Quests
 

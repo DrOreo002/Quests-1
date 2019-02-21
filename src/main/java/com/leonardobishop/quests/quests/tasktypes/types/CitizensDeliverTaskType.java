@@ -27,7 +27,8 @@ import java.util.List;
 
 public final class CitizensDeliverTaskType extends TaskType {
 
-    private List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Quests plugin = Quests.getInstance();
 
     public CitizensDeliverTaskType() {
         super("citizens_deliver", "lmbishop", "Deliver a set of items to a NPC.");
@@ -54,7 +55,7 @@ public final class CitizensDeliverTaskType extends TaskType {
     }
 
     private void checkInventory(Player player, String citizenName) {
-        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
         if (qPlayer == null) {
             return;
         }

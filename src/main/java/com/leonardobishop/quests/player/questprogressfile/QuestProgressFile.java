@@ -17,16 +17,19 @@ import java.util.concurrent.TimeUnit;
 
 public class QuestProgressFile {
 
-    private Map<String, QuestProgress> questProgress = new HashMap<>();
-    private UUID player;
+    private final Map<String, QuestProgress> questProgress = new HashMap<>();
+    private final UUID player;
+    private final Quests plugin = Quests.getInstance();
 
     public QuestProgressFile(UUID player) {
         this.player = player;
     }
 
-    //TODO change back to quest id to save performance
-
-    public boolean completeQuest(Quest quest) {
+    /**
+     * Complete the Quest
+     * @param quest : Quest object
+     */
+    public void completeQuest(Quest quest) {
         QuestProgress questProgress = getQuestProgress(quest);
         questProgress.setStarted(false);
         questProgress.setCompleted(true);
@@ -41,7 +44,7 @@ public class QuestProgressFile {
             });
             player.sendMessage(Messages.QUEST_COMPLETE.getMessage().replace("{quest}", quest.getDisplayNameStripped()));
             if (Options.TITLES_ENABLED.getBooleanValue()) {
-                Quests.getTitle().sendTitle(player, Messages.TITLE_QUEST_COMPLETE_TITLE.getMessage().replace("{quest}", quest
+                plugin.getTitle().sendTitle(player, Messages.TITLE_QUEST_COMPLETE_TITLE.getMessage().replace("{quest}", quest
                         .getDisplayNameStripped()), Messages.TITLE_QUEST_COMPLETE_SUBTITLE.getMessage().replace("{quest}", quest
                         .getDisplayNameStripped()));
             }
@@ -49,7 +52,6 @@ public class QuestProgressFile {
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', s));
             }
         }
-        return true;
     }
 
     /**
@@ -104,10 +106,9 @@ public class QuestProgressFile {
                 return 6;
             }
         }
-        if (quest.getCategoryId() != null && Quests.getQuestManager().getCategoryById(quest.getCategoryId()) != null && Quests.getQuestManager()
-                .getCategoryById(quest.getCategoryId()).isPermissionRequired()) {
+        if (quest.getCategoryid() != null && plugin.getQuestManager().getCategoryById(quest.getCategoryid()) != null && plugin.getQuestManager().getCategoryById(quest.getCategoryid()).isPermissionRequired()) {
             if (player != null) {
-                if (!p.hasPermission("quests.category." + quest.getCategoryId())) {
+                if (!p.hasPermission("quests.category." + quest.getCategoryid())) {
                     p.sendMessage(Messages.QUEST_CATEGORY_QUEST_PERMISSION.getMessage());
                     return 7;
                 }
@@ -126,7 +127,7 @@ public class QuestProgressFile {
             Player player = Bukkit.getPlayer(getPlayer());
             player.sendMessage(Messages.QUEST_START.getMessage().replace("{quest}", quest.getDisplayNameStripped()));
             if (Options.TITLES_ENABLED.getBooleanValue()) {
-                Quests.getTitle().sendTitle(player, Messages.TITLE_QUEST_START_TITLE.getMessage().replace("{quest}", quest
+                plugin.getTitle().sendTitle(player, Messages.TITLE_QUEST_START_TITLE.getMessage().replace("{quest}", quest
                         .getDisplayNameStripped()), Messages.TITLE_QUEST_START_SUBTITLE.getMessage().replace("{quest}", quest
                         .getDisplayNameStripped()));
             }
@@ -134,6 +135,12 @@ public class QuestProgressFile {
         return 0;
     }
 
+    /**
+     * Cancel the quest.
+     *
+     * @param quest : Quest object
+     * @return true if succeeded, false otherwise
+     */
     public boolean cancelQuest(Quest quest) {
         QuestProgress questProgress = getQuestProgress(quest);
         if (!questProgress.isStarted()) {
@@ -152,15 +159,20 @@ public class QuestProgressFile {
         return true;
     }
 
+    /**
+     * Add that quest progress into the cache
+     *
+     * @param questProgress : The questProgressA.K.A the data
+     */
     public void addQuestProgress(QuestProgress questProgress) {
-        this.questProgress.put(questProgress.getQuestId(), questProgress);
+        this.questProgress.put(questProgress.getQuestid(), questProgress);
     }
 
     public List<Quest> getStartedQuests() {
         List<Quest> startedQuests = new ArrayList<>();
         for (QuestProgress questProgress : questProgress.values()) {
             if (questProgress.isStarted()) {
-                startedQuests.add(Quests.getQuestManager().getQuestById(questProgress.getQuestId()));
+                startedQuests.add(plugin.getQuestManager().getQuestById(questProgress.getQuestid()));
             }
         }
         return startedQuests;
@@ -173,9 +185,7 @@ public class QuestProgressFile {
     public boolean hasStartedQuest(Quest quest) {
         //TODO always return true if the need for starting quests is disabled & requirements are met
         if (hasQuestProgress(quest)) {
-            if (getQuestProgress(quest).isStarted()) {
-                return true;
-            }
+            return getQuestProgress(quest).isStarted();
         }
         return false;
     }
@@ -193,7 +203,7 @@ public class QuestProgressFile {
 
     public boolean hasMetRequirements(Quest quest) {
         for (String id : quest.getRequirements()) {
-            Quest q = Quests.getQuestManager().getQuestById(id);
+            Quest q = plugin.getQuestManager().getQuestById(id);
             if (q == null) {
                 continue;
             }
@@ -220,8 +230,8 @@ public class QuestProgressFile {
     }
 
     public boolean generateBlankQuestProgress(String questid) {
-        if (Quests.getQuestManager().getQuestById(questid) != null) {
-            Quest quest = Quests.getQuestManager().getQuestById(questid);
+        if (plugin.getQuestManager().getQuestById(questid) != null) {
+            Quest quest = plugin.getQuestManager().getQuestById(questid);
             QuestProgress questProgress = new QuestProgress(quest.getId(), false, false, 0, player, false, false);
             for (Task task : quest.getTasks()) {
                 TaskProgress taskProgress = new TaskProgress(task.getId(), null, player, false);
@@ -251,17 +261,17 @@ public class QuestProgressFile {
         YamlConfiguration data = YamlConfiguration.loadConfiguration(file);
         data.set("quest-progress", null);
         for (QuestProgress questProgress : questProgress.values()) {
-            if (!questProgress.isWorthSaving()) {
+            if (!questProgress.isModified()) {
                 continue;
             }
-            data.set("quest-progress." + questProgress.getQuestId() + ".started", questProgress.isStarted());
-            data.set("quest-progress." + questProgress.getQuestId() + ".completed", questProgress.isCompleted());
-            data.set("quest-progress." + questProgress.getQuestId() + ".completed-before", questProgress.isCompletedBefore());
-            data.set("quest-progress." + questProgress.getQuestId() + ".completion-date", questProgress.getCompletionDate());
+            data.set("quest-progress." + questProgress.getQuestid() + ".started", questProgress.isStarted());
+            data.set("quest-progress." + questProgress.getQuestid()+ ".completed", questProgress.isCompleted());
+            data.set("quest-progress." + questProgress.getQuestid() + ".completed-before", questProgress.isCompletedBefore());
+            data.set("quest-progress." + questProgress.getQuestid() + ".completion-date", questProgress.getCompletionDate());
             for (TaskProgress taskProgress : questProgress.getTaskProgress()) {
-                data.set("quest-progress." + questProgress.getQuestId() + ".task-progress." + taskProgress.getTaskId() + ".completed", taskProgress
+                data.set("quest-progress." + questProgress.getQuestid() + ".task-progress." + taskProgress.getTaskid() + ".completed", taskProgress
                         .isCompleted());
-                data.set("quest-progress." + questProgress.getQuestId() + ".task-progress." + taskProgress.getTaskId() + ".progress", taskProgress
+                data.set("quest-progress." + questProgress.getQuestid() + ".task-progress." + taskProgress.getTaskid() + ".progress", taskProgress
                         .getProgress());
             }
         }
@@ -276,6 +286,5 @@ public class QuestProgressFile {
     public void clear() {
         questProgress.clear();
     }
-
 }
 

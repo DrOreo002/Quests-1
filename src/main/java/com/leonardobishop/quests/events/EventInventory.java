@@ -20,18 +20,23 @@ import java.util.UUID;
 
 public class EventInventory implements Listener {
 
-    private static HashMap<UUID, QMenu> tracker = new HashMap<>();
-    private ArrayList<UUID> buffer = new ArrayList<>();
+    private static final HashMap<UUID, QMenu> TRACKER = new HashMap<>();
+    private final ArrayList<UUID> buffer = new ArrayList<>();
+    private final Quests plugin;
+
+    public EventInventory(Quests plugin) {
+        this.plugin = plugin;
+    }
 
     public static void track(UUID uuid, QMenu qMenu) {
-        tracker.put(uuid, qMenu);
+        TRACKER.put(uuid, qMenu);
     }
 
     @EventHandler
     public void onEvent(InventoryClickEvent event) {
-        if (tracker.containsKey(event.getWhoClicked().getUniqueId())) {
+        if (TRACKER.containsKey(event.getWhoClicked().getUniqueId())) {
             event.setCancelled(true);
-            QMenu qMenu = tracker.get(event.getWhoClicked().getUniqueId());
+            QMenu qMenu = TRACKER.get(event.getWhoClicked().getUniqueId());
 
             if (qMenu instanceof QMenuQuest) {
                 QMenuQuest qMenuQuest = (QMenuQuest) qMenu;
@@ -48,12 +53,12 @@ public class EventInventory implements Listener {
                     QMenuCategory qMenuCategory = qMenuQuest.getSuperMenu();
                     buffer.add(event.getWhoClicked().getUniqueId());
                     event.getWhoClicked().openInventory(qMenuCategory.toInventory(1));
-                    tracker.put(event.getWhoClicked().getUniqueId(), qMenuCategory);
+                    TRACKER.put(event.getWhoClicked().getUniqueId(), qMenuCategory);
 
                 } else if (event.getSlot() < qMenuQuest.getPageSize() && qMenuQuest.getSlotsToMenu().containsKey(event.getSlot() + (((qMenuQuest
                         .getCurrentPage()) - 1) * qMenuQuest.getPageSize()))) {
                     String questid = qMenuQuest.getSlotsToMenu().get(event.getSlot() + (((qMenuQuest.getCurrentPage()) - 1) * qMenuQuest.getPageSize()));
-                    Quest quest = Quests.getQuestManager().getQuestById(questid);
+                    Quest quest = plugin.getQuestManager().getQuestById(questid);
                     if (event.getClick() == ClickType.LEFT) {
                         if (qMenuQuest.getOwner().getQuestProgressFile().startQuest(quest) == 0) {
                             event.getWhoClicked().closeInventory();
@@ -62,7 +67,7 @@ public class EventInventory implements Listener {
                         QMenuCancel qMenuCancel = new QMenuCancel(qMenuQuest.getOwner(), qMenuQuest, quest);
                         buffer.add(event.getWhoClicked().getUniqueId());
                         event.getWhoClicked().openInventory(qMenuCancel.toInventory());
-                        tracker.put(event.getWhoClicked().getUniqueId(), qMenuCancel);
+                        TRACKER.put(event.getWhoClicked().getUniqueId(), qMenuCancel);
                     }
                 }
             } else if (qMenu instanceof QMenuCategory) {
@@ -71,7 +76,7 @@ public class EventInventory implements Listener {
                 if (qMenuCategory.getSlotsToMenu().containsKey(event.getSlot())) {
                     QMenuQuest qMenuQuest = qMenuCategory.getSlotsToMenu().get(event.getSlot());
                     buffer.add(event.getWhoClicked().getUniqueId());
-                    if (qMenuCategory.getOwner().openCategory(Quests.getQuestManager().getCategoryById(qMenuQuest.getCategoryName()), qMenuQuest) != 0) {
+                    if (qMenuCategory.getOwner().openCategory(plugin.getQuestManager().getCategoryById(qMenuQuest.getCategoryName()), qMenuQuest) != 0) {
                         buffer.remove(event.getWhoClicked().getUniqueId());
                         event.getWhoClicked().sendMessage(Messages.QUEST_CATEGORY_PERMISSION.getMessage());
                     }
@@ -84,7 +89,7 @@ public class EventInventory implements Listener {
                     QMenuQuest qMenuQuest = qMenuCancel.getSuperMenu();
                     buffer.add(event.getWhoClicked().getUniqueId());
                     event.getWhoClicked().openInventory(qMenuQuest.toInventory(1));
-                    tracker.put(event.getWhoClicked().getUniqueId(), qMenuQuest);
+                    TRACKER.put(event.getWhoClicked().getUniqueId(), qMenuQuest);
                 } else if (event.getSlot() == 14 || event.getSlot() == 15 || event.getSlot() == 16) {
                     if (qMenuCancel.getOwner().getQuestProgressFile().cancelQuest(qMenuCancel.getQuest())) {
                         event.getWhoClicked().closeInventory();
@@ -98,9 +103,6 @@ public class EventInventory implements Listener {
     public void onEvent(InventoryCloseEvent event) {
         if (buffer.contains(event.getPlayer().getUniqueId())) {
             buffer.remove(event.getPlayer().getUniqueId());
-        } else if (tracker.containsKey(event.getPlayer().getUniqueId())) {
-            tracker.remove(event.getPlayer().getUniqueId());
-        }
+        } else TRACKER.remove(event.getPlayer().getUniqueId());
     }
-
 }

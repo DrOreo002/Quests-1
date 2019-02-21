@@ -10,15 +10,21 @@ import java.util.UUID;
 
 public class EventPlayerJoin implements Listener {
 
+    private final Quests plugin;
+
+    public EventPlayerJoin(Quests plugin) {
+        this.plugin = plugin;
+    }
+
     @EventHandler
     public void onEvent(PlayerJoinEvent event) {
         UUID playerUuid = event.getPlayer().getUniqueId();
-        Quests.getPlayerManager().loadPlayer(playerUuid);
+        plugin.getPlayerManager().loadPlayer(playerUuid);
         if (Quests.getInstance().getDescription().getVersion().contains("beta") && event.getPlayer().hasPermission("quests.admin")) {
             event.getPlayer().sendMessage(Messages.BETA_REMINDER.getMessage());
         }
-        if (Quests.getUpdater().isUpdateReady() && event.getPlayer().hasPermission("quests.admin")) {
-            event.getPlayer().sendMessage(Quests.getUpdater().getMessage());
+        if (plugin.getUpdater().isUpdateReady() && event.getPlayer().hasPermission("quests.admin")) {
+            event.getPlayer().sendMessage(plugin.getUpdater().getMessage());
         }
     }
 

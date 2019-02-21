@@ -1,8 +1,6 @@
 package com.leonardobishop.quests;
 
 import com.google.common.io.ByteStreams;
-import com.leonardobishop.quests.blocktype.SimilarBlocks;
-import com.leonardobishop.quests.bstats.Metrics;
 import com.leonardobishop.quests.commands.CommandQuests;
 import com.leonardobishop.quests.events.EventInventory;
 import com.leonardobishop.quests.events.EventPlayerJoin;
@@ -10,9 +8,6 @@ import com.leonardobishop.quests.events.EventPlayerLeave;
 import com.leonardobishop.quests.obj.misc.QItemStack;
 import com.leonardobishop.quests.player.QPlayer;
 import com.leonardobishop.quests.player.QPlayerManager;
-import com.leonardobishop.quests.player.questprogressfile.QuestProgress;
-import com.leonardobishop.quests.player.questprogressfile.QuestProgressFile;
-import com.leonardobishop.quests.player.questprogressfile.TaskProgress;
 import com.leonardobishop.quests.quests.Category;
 import com.leonardobishop.quests.quests.Quest;
 import com.leonardobishop.quests.quests.QuestManager;
@@ -24,105 +19,47 @@ import com.leonardobishop.quests.title.Title_Bukkit;
 import com.leonardobishop.quests.title.Title_BukkitNoTimings;
 import com.leonardobishop.quests.title.Title_Other;
 import com.leonardobishop.quests.updater.Updater;
+import lombok.Getter;
+import me.droreo002.oreocore.OreoCore;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 
 public class Quests extends JavaPlugin {
 
+    @Getter
     private static Quests instance;
-    private static QuestManager questManager;
-    private static QPlayerManager qPlayerManager;
-    private static TaskTypeManager taskTypeManager;
-    private static Updater updater;
-    private static Title title;
+    @Getter
+    private QuestManager questManager;
+    @Getter
+    private QPlayerManager playerManager;
+    @Getter
+    private TaskTypeManager taskTypeManager;
+    @Getter
+    private Updater updater;
+    @Getter
+    private Title title;
+    @Getter
     private boolean brokenConfig = false;
-
-    public static Quests getInstance() {
-        return instance;
-    }
-
-    public static QuestManager getQuestManager() {
-        return questManager;
-    }
-
-    public static QPlayerManager getPlayerManager() {
-        return qPlayerManager;
-    }
-
-    public static TaskTypeManager getTaskTypeManager() {
-        return taskTypeManager;
-    }
-
-    public boolean isBrokenConfig() {
-        return brokenConfig;
-    }
-
-    public static Title getTitle() {
-        return title;
-    }
-
-    public static Updater getUpdater() {
-        return updater;
-    }
-
-    public static String convertToFormat(long m) {
-        long hours = m / 60;
-        long minutesLeft = m - hours * 60;
-
-        String formattedTime = "";
-
-        if (hours < 10)
-            formattedTime = formattedTime + "0";
-        formattedTime = formattedTime + hours + "h";
-
-        formattedTime = formattedTime + " ";
-
-        if (minutesLeft < 10)
-            formattedTime = formattedTime + "0";
-        formattedTime = formattedTime + minutesLeft + "m";
-
-        return formattedTime;
-    }
-
-    public Quests() {
-    }
-
-    public Quests(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
-        super(loader, description, dataFolder, file);
-    }
-
-    public void prepareForTest() {
-        instance = this;
-        taskTypeManager = new TaskTypeManager();
-        questManager = new QuestManager();
-        qPlayerManager = new QPlayerManager();
-
-        updater = new Updater(this);
-    }
-
 
     @Override
     public void onEnable() {
         instance = this;
         taskTypeManager = new TaskTypeManager();
         questManager = new QuestManager();
-        qPlayerManager = new QPlayerManager();
+        playerManager = new QPlayerManager();
 
         dataGenerator();
         setupTitle();
@@ -143,6 +80,7 @@ public class Quests extends JavaPlugin {
         taskTypeManager.registerTaskType(new PositionTaskType());
         taskTypeManager.registerTaskType(new PlaytimeTaskType());
         taskTypeManager.registerTaskType(new BrewingTaskType());
+
         // TODO: FIX
         // taskTypeManager.registerTaskType(new BrewingCertainTaskType());
         if (Bukkit.getPluginManager().isPluginEnabled("ASkyBlock")) {
@@ -156,76 +94,17 @@ public class Quests extends JavaPlugin {
             taskTypeManager.registerTaskType(new CitizensInteractTaskType());
         }
 
-        Bukkit.getPluginCommand("quests").setExecutor(new CommandQuests());
-        Bukkit.getPluginManager().registerEvents(new EventPlayerJoin(), this);
-        Bukkit.getPluginManager().registerEvents(new EventInventory(), this);
-        Bukkit.getPluginManager().registerEvents(new EventPlayerLeave(), this);
+        Bukkit.getPluginCommand("quests").setExecutor(new CommandQuests(this));
+        Bukkit.getPluginManager().registerEvents(new EventPlayerJoin(this), this);
+        Bukkit.getPluginManager().registerEvents(new EventInventory(this), this);
+        Bukkit.getPluginManager().registerEvents(new EventPlayerLeave(this), this);
 
-        Metrics metrics = new Metrics(this);
-        this.getLogger().log(Level.INFO, "Metrics started. This can be disabled at /plugins/bStats/config.yml.");
-
-        SimilarBlocks.addBlocks();
-
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                reloadQuests();
-
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    qPlayerManager.loadPlayer(player.getUniqueId());
-                }
-            }
-        }.runTask(this);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                for (QPlayer qPlayer : qPlayerManager.getQPlayers()) {
-                    if (qPlayer.isOnlyDataLoaded()) {
-                        continue;
-                    }
-                    qPlayer.getQuestProgressFile().saveToDisk();
-                }
-            }
-        }.runTaskTimerAsynchronously(this, 12000L, 12000L);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                for (QPlayer qPlayer : qPlayerManager.getQPlayers()) {
-                    if (qPlayer.isOnlyDataLoaded()) {
-                        continue;
-                    }
-                    QuestProgressFile questProgressFile = qPlayer.getQuestProgressFile();
-                    for (Map.Entry<String, Quest> entry : Quests.getQuestManager().getQuests().entrySet()) {
-                        Quest quest = entry.getValue();
-                        QuestProgress questProgress = questProgressFile.getQuestProgress(quest);
-                        if (questProgress != null && questProgress.isStarted()) {
-                            boolean complete = true;
-                            for (TaskProgress taskProgress : questProgress.getTaskProgress()) {
-                                if (!taskProgress.isCompleted()) {
-                                    complete = false;
-                                    break;
-                                }
-                            }
-                            if (complete) {
-                                questProgressFile.completeQuest(quest);
-                            }
-                        }
-                    }
-                }
-            }
-        }.runTaskTimer(this, 20L, 20L);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                updater = new Updater(Quests.this);
-                updater.check();
-            }
-        }.runTaskAsynchronously(this);
+        OreoCore.getInstance().dependPlugin(this, false);
     }
 
     @Override
     public void onDisable() {
-        for (QPlayer qPlayer : qPlayerManager.getQPlayers()) {
+        for (QPlayer qPlayer : playerManager.getQPlayers()) {
             if (qPlayer.isOnlyDataLoaded()) {
                 continue;
             }
@@ -411,48 +290,36 @@ public class Quests extends JavaPlugin {
         return is;
     }
 
-    private boolean setupTitle() {
+    private void setupTitle() {
         String version;
         try {
             version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
         } catch (ArrayIndexOutOfBoundsException e) {
-            return false;
+            return;
         }
-        boolean success = false;
         getLogger().info("Your server is running version " + version + ".");
         if (version.startsWith("v1_7")) {
             title = new Title_Other();
-            success = true;
         } else if (version.equals("v1_8_R3")) {
             title = new Title_BukkitNoTimings();
-            success = true;
         } else if (version.equals("v1_8_R2")) {
             title = new Title_BukkitNoTimings();
-            success = true;
         } else if (version.equals("v1_8_R1")) {
             title = new Title_BukkitNoTimings();
-            success = true;
         } else if (version.equals("v1_9_R2")) {
             title = new Title_BukkitNoTimings();
-            success = true;
         } else if (version.equals("v1_9_R1")) {
             title = new Title_BukkitNoTimings();
-            success = true;
         } else if (version.equals("v1_10_R1")) {
             title = new Title_BukkitNoTimings();
-            success = true;
         } else if (version.equals("v1_11_R1")) {
             title = new Title_Bukkit();
-            success = true;
         } else if (version.startsWith("v1_12")) {
             title = new Title_Bukkit();
-            success = true;
         } else if (version.startsWith("v1_13")) {
             title = new Title_Bukkit();
-            success = true;
         } else if (version.startsWith("v1_14")) {
             title = new Title_Bukkit();
-            success = true;
         } else {
             title = new Title_BukkitNoTimings();
         }
@@ -463,7 +330,6 @@ public class Quests extends JavaPlugin {
         } else {
             getLogger().info("Titles are not supported for this version.");
         }
-        return success;
     }
 
     private void dataGenerator() {
@@ -487,5 +353,40 @@ public class Quests extends JavaPlugin {
                 return;
             }
         }
+    }
+
+    public static String convertToFormat(long m) {
+        long hours = m / 60;
+        long minutesLeft = m - hours * 60;
+
+        String formattedTime = "";
+
+        if (hours < 10)
+            formattedTime = formattedTime + "0";
+        formattedTime = formattedTime + hours + "h";
+
+        formattedTime = formattedTime + " ";
+
+        if (minutesLeft < 10)
+            formattedTime = formattedTime + "0";
+        formattedTime = formattedTime + minutesLeft + "m";
+
+        return formattedTime;
+    }
+
+    public Quests() {
+    }
+
+    public Quests(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
+        super(loader, description, dataFolder, file);
+    }
+
+    public void prepareForTest() {
+        instance = this;
+        taskTypeManager = new TaskTypeManager();
+        questManager = new QuestManager();
+        playerManager = new QPlayerManager();
+
+        updater = new Updater(this);
     }
 }

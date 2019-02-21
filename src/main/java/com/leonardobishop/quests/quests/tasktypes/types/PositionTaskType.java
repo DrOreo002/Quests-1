@@ -22,7 +22,8 @@ import java.util.List;
 
 public final class PositionTaskType extends TaskType {
 
-    private List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Quests plugin = Quests.getInstance();
 
     public PositionTaskType() {
         super("position", "lmbishop", "Reach a set of co-ordinates.");
@@ -46,7 +47,7 @@ public final class PositionTaskType extends TaskType {
 
         Player player = event.getPlayer();
 
-        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
         QuestProgressFile questProgressFile = qPlayer.getQuestProgressFile();
 
         for (Quest quest : super.getRegisteredQuests()) {

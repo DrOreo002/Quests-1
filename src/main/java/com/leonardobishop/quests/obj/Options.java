@@ -1,6 +1,8 @@
 package com.leonardobishop.quests.obj;
 
 import com.leonardobishop.quests.Quests;
+import lombok.Getter;
+import me.droreo002.oreocore.utils.strings.StringUtil;
 import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ public enum Options {
     GUITITLE_QUEST_CANCEL("options.guinames.quest-cancel"),
     ALLOW_QUEST_CANCEL("options.allow-quest-cancel");
 
+    @Getter
     private String path;
 
     Options(String path) {
@@ -37,20 +40,5 @@ public enum Options {
 
     public boolean getBooleanValue() {
         return Quests.getInstance().getConfig().getBoolean(path);
-    }
-
-    public List<String> getStringListValue() {
-        return Quests.getInstance().getConfig().getStringList(path);
-    }
-
-    public static String color(String s) {
-        return ChatColor.translateAlternateColorCodes('&', s);
-    }
-    public static List<String> color(List<String> s) {
-        List<String> colored = new ArrayList<>();
-        for (String line : s) {
-            colored.add(ChatColor.translateAlternateColorCodes('&', line));
-        }
-        return colored;
     }
 }

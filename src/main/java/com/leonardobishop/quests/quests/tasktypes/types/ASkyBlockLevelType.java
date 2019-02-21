@@ -18,7 +18,8 @@ import java.util.List;
 
 public final class ASkyBlockLevelType extends TaskType {
 
-    private List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Quests plugin = Quests.getInstance();
 
     public ASkyBlockLevelType() {
         super("askyblock_level", "lmbishop", "Reach a certain island level for ASkyBlock.");
@@ -32,7 +33,7 @@ public final class ASkyBlockLevelType extends TaskType {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onIslandLevel(IslandPostLevelEvent event) {
-        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(event.getPlayer());
+        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(event.getPlayer());
         if (qPlayer == null) {
             return;
         }

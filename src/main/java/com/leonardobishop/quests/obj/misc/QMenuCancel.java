@@ -4,6 +4,7 @@ import com.leonardobishop.quests.player.QPlayer;
 import com.leonardobishop.quests.quests.Quest;
 import com.leonardobishop.quests.obj.Items;
 import com.leonardobishop.quests.obj.Options;
+import me.droreo002.oreocore.utils.strings.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 public class QMenuCancel implements QMenu {
 
-    private HashMap<Integer, String> slotsToQuestIds = new HashMap<>();
+    private Map<Integer, String> slotsToQuestIds = new HashMap<>();
     private QMenuQuest superMenu;
     private QPlayer owner;
     private Quest quest;
@@ -28,12 +29,8 @@ public class QMenuCancel implements QMenu {
         this.quest = quest;
     }
 
-    public void populate(List<Quest> quests) {
-        /* ignored */
-    }
-
     @Override
-    public HashMap<Integer, String> getSlotsToMenu() {
+    public Map<Integer, String> getSlotsToMenu() {
         return slotsToQuestIds;
     }
 
@@ -47,7 +44,7 @@ public class QMenuCancel implements QMenu {
     }
 
     public Inventory toInventory() {
-        String title = Options.color(Options.GUITITLE_QUEST_CANCEL.getStringValue());
+        String title = StringUtil.color(Options.GUITITLE_QUEST_CANCEL.getStringValue());
 
         ItemStack yes = Items.QUEST_CANCEL_YES.getItem();
         ItemStack no = Items.QUEST_CANCEL_NO.getItem();

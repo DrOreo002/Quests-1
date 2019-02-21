@@ -19,7 +19,8 @@ import java.util.List;
 
 public final class TamingTaskType extends TaskType {
 
-    private List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final List<ConfigValue> creatorConfigValues = new ArrayList<>();
+    private final Quests plugin = Quests.getInstance();
 
     public TamingTaskType() {
         super("taming", "lmbishop", "Tame a set amount of animals.");
@@ -39,7 +40,7 @@ public final class TamingTaskType extends TaskType {
 
         Player player = (Player) event.getOwner();
 
-        QPlayer qPlayer = Quests.getPlayerManager().getPlayer(player.getUniqueId());
+        QPlayer qPlayer = plugin.getPlayerManager().getPlayer(player.getUniqueId());
         QuestProgressFile questProgressFile = qPlayer.getQuestProgressFile();
 
         for (Quest quest : super.getRegisteredQuests()) {
