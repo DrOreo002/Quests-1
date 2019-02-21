@@ -1,5 +1,5 @@
 ## Quests
-Code edited by DrOreo002. Will be used into my server.
+Code edited by DrOreo002. Will be used on my server, feel free to fork or download it
 
 Pros :
 > Cleaner code
